@@ -1,0 +1,33 @@
+<template>
+    <lightning-combobox
+            name="group"
+            label="Group"
+            value={value}
+            placeholder="Select Group"
+            options={groups}
+            onchange={handleGroupChange} 
+            class="combo">
+    </lightning-combobox>
+
+     
+    <lightning-combobox
+            name="subgroup"
+            label="Subgroup"
+            value={value1}
+            placeholder="Select Subgroup"
+            options={subgroups}
+            onchange={handleSubgroupChange} >
+    </lightning-combobox>
+    
+
+    <div class="slds-var-m-around_medium" style="width: 800px">
+        <template if:true={dishes.data}>
+            <lightning-datatable
+                key-field="id"
+                data={dishes.data}
+                columns={columns}>
+            </lightning-datatable>
+        </template>
+    </div>
+      
+</template>
