@@ -17,7 +17,7 @@ public with sharing class FetchDataHelper {
 
     @AuraEnabled(cacheable=true)
     public static List<Dish_Item__c> getDishesBySubgroup(Id subgroupId){
-        return [SELECT Id, Name, Price__c, Description__c
+        return [SELECT Id, Name, Price__c, Description__c, Amount__c
                 FROM Dish_Item__c 
                 WHERE Dish_Subgroup__c =: subgroupId
                 WITH SECURITY_ENFORCED];

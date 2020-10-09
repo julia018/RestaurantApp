@@ -17,15 +17,26 @@
             placeholder="Select Subgroup"
             options={subgroups}
             onchange={handleSubgroupChange} >
-    </lightning-combobox>
+    </lightning-combobox>   
     
 
-    <div class="slds-var-m-around_medium" style="width: 800px">
-        <template if:true={dishes.data}>
+    <div class="slds-var-m-around_medium">
+        <template if:true={showTable}>
+            <c-paginator records={dishes} 
+                        total-records={dishes.length} 
+                        show-search-box="true" 
+                        onpaginatorchange={handlePaginatorChange}>
+            </c-paginator>
             <lightning-datatable
                 key-field="id"
-                data={dishes.data}
-                columns={columns}>
+                data={dishesToDisplay}
+                columns={columns}
+                onrowaction={handleRowAction}
+                draft-values={draftValues}
+                suppress-bottom-bar="true"
+                show-row-number-column
+                row-number-offset={rowNumberOffset}
+                wrap-text-max-lines="5">
             </lightning-datatable>
         </template>
     </div>

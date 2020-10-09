@@ -1,0 +1,15 @@
+.customSelect select {
+    padding-right: var(--lwc-squareIconUtilityMedium, 1.25rem);
+    min-height: inherit;
+    line-height: normal;
+    height: 1.4rem;    
+}
+.customSelect label {
+    margin-top: .1rem;
+}
+.customInput {
+    
+    height: 1.4rem;
+    border-radius: 3px;
+    background-color:#fff;
+}

@@ -1,0 +1,10 @@
+<template>
+    <lightning-card title="Order Details" icon-name="utility:info">
+        <lightning-input type="currency" value="3" readonly></lightning-input>
+        <div>
+            <lightning-button variant="base" label="Order Details" onclick={showOrderDetails} ></lightning-button>
+            <lightning-button variant="base" label="Make an Order" onclick={makeOrder} ></lightning-button>
+        </div>
+        <c-popup need-show={needShowModal} onhide={hideModal}></c-popup>
+    </lightning-card>
+</template>
