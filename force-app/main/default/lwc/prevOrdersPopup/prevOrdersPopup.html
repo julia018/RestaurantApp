@@ -1,0 +1,14 @@
+<template>
+    <c-paginator records={orders} 
+                        total-records={orders.length} 
+                        show-search-box="true" 
+                        onpaginatorchange={handlePaginatorChange}>
+            </c-paginator>
+            <lightning-datatable
+                key-field="id"
+                data={ordersToDisplay}
+                columns={columns}
+                show-row-number-column
+                row-number-offset={rowNumberOffset}>
+            </lightning-datatable>
+</template>

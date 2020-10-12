@@ -4,7 +4,11 @@
         <div>
             <lightning-button variant="base" label="Order Details" onclick={showOrderDetails} ></lightning-button>
             <lightning-button variant="base" label="Make an Order" onclick={makeOrder} ></lightning-button>
+            <lightning-input type="checkbox" label="Red"></lightning-input>
+            <lightning-input type="text" label="Red" readonly>!</lightning-input>
+            <lightning-button variant="base" label="Make an Order with delivery" onclick={makeOrderWithDelivery} ></lightning-button>
+        
         </div>
-        <c-popup need-show={needShowModal} onhide={hideModal}></c-popup>
+        <c-popup need-show={needShowModal} onhide={hideModal} order-dishes={orderDishes}></c-popup>
     </lightning-card>
 </template>

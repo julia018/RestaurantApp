@@ -8,6 +8,17 @@ let cols = [
     { label: 'Dish', fieldName: 'Name', hideDefaultActions: true },
     { label: 'Price', fieldName: 'Price__c', type: 'currency', typeAttributes: { currencyCode: 'USD'}, hideDefaultActions: true },
     { label: 'Description', fieldName: 'Description__c', type: 'text' },
+    {
+        type:  'button',
+        typeAttributes: 
+        {
+          iconName: 'utility:add',
+          label: 'Add', 
+          name: 'addDishItem', 
+          title: 'Add to Order', 
+          disabled: false
+        }
+      },
     { label: 'Amount', fieldName: 'Amount__c', type: 'number', editable: true, hideDefaultActions: true,  typeAttributes: { maximumFractionDigits: 0 },  cellAttributes: { alignment: 'center'}},
     { label: 'Comments', fieldName: 'comments', type: 'text', hideDefaultActions: true, wrapText: true, editable: true }
 ];  
@@ -21,7 +32,12 @@ export default class Menu extends LightningElement {
 
     value1 = '';
 
-    @track wrapTextMaxLines = 8;
+    @track
+    selectedRowsToDisplay = [];
+
+    allSelectedRaws = [];
+
+    orderItems = [];
 
     @track rowNumberOffset = 0;
 
@@ -106,7 +122,58 @@ export default class Menu extends LightningElement {
     }
 
     handleRowAction(event) {
-        console.log(JSON.stringify(event.detail.action));
+        console.log(JSON.stringify(event.detail.action.name));
+        //error
+        if(event.detail.action.name == 'addDishItem') {
+            let row = event.detail.row;
+            console.log(JSON.stringify(event.detail.row));
+            let orderItem = {
+                "Name": event.detail.row.Name,
+                "Price": event.detail.row.Price__c,
+                "Description": event.detail.row.Description__c,
+                "Id": event.detail.row.Id,
+                "Amount": event.detail.row.Amount__c 
+            }
+            this.addOrderItem(orderItem);
+
+            /*const event = new ShowToastEvent({
+                title: 'Success',
+                message: 'Item addedd to order!'
+            });
+            this.dispatchEvent(event);*/
+
+            const selectEvent = new CustomEvent("dishselect", 
+                {
+                detail: this.orderItems
+              });
+          
+              // Dispatches the event.
+              this.dispatchEvent(selectEvent);
+              console.log('Order items!');
+              console.log(this.orderItems);
+        }
+        //console.log(JSON.stringify(event.detail.rowNumber));
+    }
+
+
+    isIdPresent(element) {
+        console.log('This');
+        console.log(this.Id);
+        console.log('El');
+        console.log(element.Id);
+        return element.Id == this.Id;
+    } 
+
+    addOrderItem(row) {
+        console.log('Add order item!');
+        let index = this.orderItems.findIndex(this.isIdPresent, row);
+        console.log('Index ' + index);
+        if(index != -1) {
+            this.orderItems[index].Amount++; 
+        } else {
+            this.orderItems.push(row);
+        }
+        console.log('End!');
     }
 
     handleSave(event) {

@@ -32,11 +32,12 @@
                 data={dishesToDisplay}
                 columns={columns}
                 onrowaction={handleRowAction}
+                oncheck={handleCheck}
                 draft-values={draftValues}
                 suppress-bottom-bar="true"
                 show-row-number-column
                 row-number-offset={rowNumberOffset}
-                wrap-text-max-lines="5">
+                selected-rows={selectedRowsToDisplay}>
             </lightning-datatable>
         </template>
     </div>
