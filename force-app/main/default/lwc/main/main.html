@@ -1,6 +1,6 @@
 <template>
     <lightning-card title="Menu">  
         <c-menu ondishselect={handleOrderListChange}></c-menu>
-        <c-order-info order-dishes={selectedDishes}></c-order-info>
+        <c-order-info order-dishes={selectedDishes} total-price={totalPrice} onitemschange={handleChange}></c-order-info>
     </lightning-card>
 </template>

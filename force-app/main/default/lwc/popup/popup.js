@@ -4,8 +4,30 @@ let cols = [
     { label: 'Item', fieldName: 'Name', hideDefaultActions: true },
     { label: 'Price', fieldName: 'Price', type: 'currency', typeAttributes: { currencyCode: 'USD'}, hideDefaultActions: true },
     { label: 'Description', fieldName: 'Description', type: 'text' },
-    { label: 'Amount', fieldName: 'Amount', type: 'number', editable: true, hideDefaultActions: true,  typeAttributes: { maximumFractionDigits: 0 },  cellAttributes: { alignment: 'center'}},
+    { label: 'Amount', fieldName: 'Amount', type: 'number', hideDefaultActions: true, cellAttributes: { alignment: 'center'}},
     { label: 'Comments', fieldName: 'Comments', type: 'text', hideDefaultActions: true, wrapText: true, editable: true },
+    {
+        type:  'button',
+        typeAttributes: 
+        {
+          iconName: 'utility:add',
+          label: '+1', 
+          name: 'incDishItem', 
+          title: 'add one to order', 
+          disabled: false
+        }
+      },
+      {
+        type:  'button',
+        typeAttributes: 
+        {
+          iconName: 'utility:delete',
+          label: '-1', 
+          name: 'decDishItem', 
+          title: 'delete one frow Order', 
+          disabled: false
+        }
+      },
     {
         type:  'button',
         typeAttributes: 
@@ -27,24 +49,37 @@ export default class Popup extends LightningElement {
     @api
     orderDishes = [];
 
+    orderDishesCopy;
+
     columns = cols;
 
-    @track
-    total = 0;
+    @api
+    totalPrice = 0;
 
-    get totalPrice() {
-        this.orderDishes = JSON.parse(JSON.stringify(this.orderDishes));
-        const reducer = (accumulator, currentValue) => accumulator + currentValue.Amount * currentValue.Price;
+    @track
+    draftValues = [];
+
+    
+    /*get totalPrice() {
+        console.log('Getting total Price');
+        //this.orderDishes = JSON.parse(JSON.stringify(this.orderDishes));
+        console.log('Current dishes');
+        console.log(this.orderDishes);
+        console.log('Current draft values');
+        console.log(this.draftValues);
+
         let sum = 0;
         for(let i=0;i<this.orderDishes.length; i++) {
             let item = this.orderDishes[i];
+            //let amount = this.getCurrentAmount(item);
             sum+= item.Amount * item.Price;
         }
         this.total = sum;
+
         console.log('Total');
         console.log(this.total);
         return `${this.total}`;
-    }
+    }*/    
 
 
     hideOrderDetails() {
@@ -59,32 +94,41 @@ export default class Popup extends LightningElement {
             let row = event.detail.row;
             console.log(JSON.stringify(event.detail.row));
             this.deleteDishItem(row.Id);
+        } else if(event.detail.action.name == 'incDishItem') {
+            this.changeDishAmount(true, event.detail.row.Id);
+        } else if(event.detail.action.name == 'decDishItem') {
+            this.changeDishAmount(false, event.detail.row.Id);
         }
     }
 
+    changeDishAmount(flag, Id) {
+        this.orderDishesCopy = JSON.parse(JSON.stringify(this.orderDishes));
+        let index = this.orderDishes.findIndex(this.isIdEqual, Id);
+        let amount = this.orderDishesCopy[index].Amount;
+        if(flag) {
+            this.orderDishesCopy[index].Amount++;
+        } else {
+            if(amount == 1) {
+                this.orderDishesCopy.splice(index, 1);
+            } else {
+                this.orderDishesCopy[index].Amount--;
+            }
+        }
+        this.notifyOrderDishesChange();
+    }
+
     deleteDishItem(Id) { 
-        this.orderDishes = JSON.parse(JSON.stringify(this.orderDishes));
+        //this.orderDishes = JSON.parse(JSON.stringify(this.orderDishes));
+        this.orderDishesCopy = JSON.parse(JSON.stringify(this.orderDishes));
         console.log(' items before deletion!');
               console.log(this.orderDishes);
-        let index = this.orderDishes.findIndex(this.isIdEqual, Id);
+        let index = this.orderDishesCopy.findIndex(this.isIdEqual, Id);
         console.log(index);
-        console.log(this.orderDishes[index].Amount);
         console.log(typeof(this.orderDishes[index].Amount));
-
-        // ?!?!
-
         //this.orderDishes[index].Amount = 0;
-        this.orderDishes.splice(index, 1);
+        this.orderDishesCopy.splice(index, 1);
         //console.log(this.orderDishes);
-        const deleteEvent = new CustomEvent("dishdelete", 
-                {
-                detail: this.orderDishes[index]
-              });
-          
-              // Dispatches the event.
-              this.dispatchEvent(deleteEvent);
-              console.log(' items after deletion!');
-              console.log(this.orderDishes);
+        this.notifyOrderDishesChange();
     }
 
     isIdEqual(element) {
@@ -94,5 +138,36 @@ export default class Popup extends LightningElement {
         console.log(element.Id);
         return element.Id == this;
     } 
+
+    notifyOrderDishesChange() {
+        console.log('notifyOrderDishesChange!');
+        const changeEvent = new CustomEvent("itemschange", 
+                {
+                detail:  this.orderDishesCopy
+              });
+          
+              // Dispatches the event.
+              this.dispatchEvent(changeEvent);
+              console.log(' items after change!');
+              console.log(this.orderDishes);
+    }
+
+    handleSave(event) {
+        console.log('Saving!');
+        console.log(event.detail.draftValues);
+        this.updateComments(event.detail.draftValues);
+        this.draftValues = [];
+    }
+
+    updateComments(draftValues) {
+        this.orderDishesCopy = JSON.parse(JSON.stringify(this.orderDishes)); 
+        for(let i = 0; i < draftValues.length; i++) {
+            let id = draftValues[i].Id;
+            let newComments = draftValues[i].Comments;
+            let index = this.orderDishesCopy.findIndex(this.isIdEqual, id);
+            this.orderDishesCopy[index].Comments = newComments;            
+        }
+        this.notifyOrderDishesChange();
+    }
         
 }

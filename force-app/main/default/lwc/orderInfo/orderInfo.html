@@ -2,13 +2,17 @@
     <lightning-card title="Order Details" icon-name="utility:info">
         <lightning-input type="currency" value="3" readonly></lightning-input>
         <div>
-            <lightning-button variant="base" label="Order Details" onclick={showOrderDetails} ></lightning-button>
-            <lightning-button variant="base" label="Make an Order" onclick={makeOrder} ></lightning-button>
-            <lightning-input type="checkbox" label="Red"></lightning-input>
-            <lightning-input type="text" label="Red" readonly>!</lightning-input>
-            <lightning-button variant="base" label="Make an Order with delivery" onclick={makeOrderWithDelivery} ></lightning-button>
-        
+            <lightning-button variant="success" label="Order Details" onclick={showOrderDetails} ></lightning-button>
+            <lightning-input type="checkbox" label="Home Delivery" onchange={handleHomeDeliveryChange}></lightning-input>
+            <template if:true={showAddressField}>
+                <lightning-input type="text" name="addressInput" label="Delivery Address" onchange={addressChange}></lightning-input>
+            </template>
+            
+            
+            <lightning-button variant="success" label="Make an Order" onclick={makeOrder} ></lightning-button>
+            
+                    
         </div>
-        <c-popup need-show={needShowModal} onhide={hideModal} order-dishes={orderDishes}></c-popup>
+        <c-popup need-show={needShowModal} onhide={hideModal} order-dishes={orderDishes} total-price={totalPrice} onitemschange={handleOrderItemsChange}></c-popup>
     </lightning-card>
 </template>

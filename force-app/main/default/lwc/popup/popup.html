@@ -15,15 +15,16 @@
   </header>
 
   <!-- modal body start -->
-  <div class="slds-modal__content slds-var-p-around_medium" id="modal-content-id-1">
+  <div id="modal-content-id-1">
     <template if:true={orderDishes}>
         <lightning-datatable
-        key-field="id"
+        key-field="Id"
         data={orderDishes}
         columns={columns}
         onrowaction={handleRowAction}
+        onsave={handleSave}
         draft-values={draftValues}
-        suppress-bottom-bar="true"
+        oncancel={handleCancel}
         show-row-number-column>
     </lightning-datatable>
       </template>
@@ -32,7 +33,6 @@
 
   <!-- modal footer start-->
   <footer class="slds-modal__footer">      
-     <button class="slds-button slds-button_neutral" onclick={hideOrderDetails}>Cancel</button>
   </footer>
 
 </div>
