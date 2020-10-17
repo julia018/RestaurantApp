@@ -12,12 +12,24 @@
                 </div>
             </div>
         </div>
+        <div class="slds-col"><!--COMBO-BOX-->
+            <div if:true={showComboBox}>
+                <div class="slds-var-p-horizontal_x-small slds-var-p-bottom_xx-small">
+                    <lightning-combobox name="status" label="Order Status" placeholder="Select Progress" options={options} onchange={handleComboBoxChange} ></lightning-combobox>
+                </div>
+            </div>
+        </div>
         <div class="slds-col"><!--SEARCH BOX-->
             <div if:true={showSearchBox}>
                 <div class="slds-var-p-horizontal_x-small slds-var-p-bottom_xx-small">
-                    <lightning-input label="" type="search" placeholder="Search by any Col Value" variant="label-hidden" onchange={handleKeyChange}></lightning-input>
+                    <lightning-input label="" type="search" placeholder="Search by Name" variant="label-hidden" onchange={handleKeyChange}></lightning-input>
                 </div>
             </div>
+        </div>
+        <div class="slds-col"><!--DATE PICKER-->
+            <template if:true={showDatePicker}>
+                <lightning-input type="date" name="dateInput" label="Enter a date" onchange={handleDateChange}></lightning-input>
+            </template>            
         </div>
         <div class="slds-col"><!--PAGE NAVIGATION-->
             <div style={controlPagination}>

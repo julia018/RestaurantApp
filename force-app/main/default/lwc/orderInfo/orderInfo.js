@@ -1,6 +1,7 @@
 import { api, LightningElement, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import  insertOrder from '@salesforce/apex/FetchDataHelper.insertOrder';
+import insertOrderItem from '@salesforce/apex/FetchDataHelper.insertOrderItem';
 
 import userId from '@salesforce/user/Id';
 
@@ -71,6 +72,10 @@ export default class OrderInfo extends LightningElement {
     }
 
     makeOrder() {
+        if(this.orderDishes.length == 0) {
+            this.showToast('warning', 'Choose at least one dish, please!');
+            return;
+        }
         if(this.showAddressField && !this.isAddressSpecified()) {
             this.showSpecifyAddressToast();
         }
@@ -78,16 +83,45 @@ export default class OrderInfo extends LightningElement {
 
         console.log('Making order!');
 
-        let orderId = insertOrder({totalPrice:this.totalPrice, owner:this.id, address:this.address}).then(result=>{
-            console.log(JSON.stringify(result));
+        insertOrder({totalPrice:this.totalPrice, owner:this.id, address:this.address}).then(result=>{
+            console.log('res'); 
+            let orderId = ''+result;
+            console.log(result); 
+            if(orderId == '0') {
+                this.showToast('error', 'Error making order, try later!');
+            }   
+            this.orderDishes.forEach(orderDish => {
+                console.log('Dish');
+                console.log(orderDish);
+                this.insertSingleOrderItem(orderDish.Amount, orderDish.comments, orderDish.Id, orderId);
+                this.showToast('success', 'Your order is accepted!');
+                
+            });
+            const changeEvent = new CustomEvent("itemschange", 
+                {
+                    detail:  this.orderDishes
+                });
+          
+                // Dispatches the event.
+                this.dispatchEvent(changeEvent);
         }).catch(error=>{
+            this.showToast('error', 'Error making order, try later!');
             console.log(error);
-        });
+            return;
+        });               
+        
+    }
 
-        /*let orderId = insertOrder(this.totalPrice, this.id, this.address);   
-        console.log('Order id');  */
-        console.log(orderId);  
-
+    insertSingleOrderItem(amount, comments, dishId, orderId) {
+        console.log('inserting order item');        
+        insertOrderItem({amount: amount, comments: comments, dishItemId: dishId, orderId: orderId}).then(res=>{
+            console.log(res);
+            return res;
+        }).catch(error=>{
+            this.showToast('error', 'Error making order, try later!');
+            console.log(error);
+            return;
+        }); 
     }
 
     isAddressSpecified() {
@@ -98,6 +132,15 @@ export default class OrderInfo extends LightningElement {
         const event = new ShowToastEvent({
             title: '...',
             message: 'Specify delivery address, please.',
+        });
+        this.dispatchEvent(event);
+    }
+
+    showToast(variant, message) {
+        const event = new ShowToastEvent({
+            title: '...',
+            message: message,
+            variant: variant
         });
         this.dispatchEvent(event);
     }

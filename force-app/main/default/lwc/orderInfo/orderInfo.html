@@ -1,6 +1,6 @@
 <template>
-    <lightning-card title="Order Details" icon-name="utility:info">
-        <lightning-input type="currency" value="3" readonly></lightning-input>
+    <lightning-card title="Order Details" icon-name="standard:order_item">
+        <lightning-input type="number" label="Total Order Price" value={totalPrice} readonly></lightning-input>
         <div>
             <lightning-button variant="success" label="Order Details" onclick={showOrderDetails} ></lightning-button>
             <lightning-input type="checkbox" label="Home Delivery" onchange={handleHomeDeliveryChange}></lightning-input>

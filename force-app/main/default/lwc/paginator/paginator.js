@@ -7,10 +7,14 @@ const showIt = 'visibility:visible';
 const hideIt = 'visibility:hidden'; //visibility keeps the component space, but display:none doesn't
 export default class Paginator extends LightningElement {
     @api showSearchBox = false; //Show/hide search box; valid values are true/false
+    @api searchFieldName;
     @api showPagination; //Show/hide pagination; valid values are true/false
+    @api showDatePicker = false;
+    @api showComboBox = false;
     @api pageSizeOptions = recordsPerPage; //Page size options; valid values are array of integers
     @api totalRecords; //Total no.of records; valid type is Integer
-    @api records; //All records available in the data table; valid type is Array 
+    @track records;
+    @api options = [];
     @track pageSize; //No.of records to be displayed per page
     @track totalPages; //Total no.of pages
     @track pageNumber = pageNumber; //Page number
@@ -18,7 +22,19 @@ export default class Paginator extends LightningElement {
     @track controlPagination = showIt;
     @track controlPrevious = hideIt; //Controls the visibility of Previous page button
     @track controlNext = showIt; //Controls the visibility of Next page button
-    recordsToDisplay = []; //Records to be displayed on the page
+    @track recordsToDisplay = []; //Records to be displayed on the page
+
+    @api 
+    set recordsP(value) { //All records available in the data table; valid type is Array 
+        this.setAttribute('recordsP', value);
+        this.records = value;
+        console.log('Setting paginator records');
+        this.setRecordsToDisplay();
+    }
+
+    get recordsP() {
+        return this.records;
+    }
 
     //Called after the component finishes inserting to DOM
     connectedCallback() {
@@ -29,6 +45,8 @@ export default class Paginator extends LightningElement {
             this.showPagination = false;
         }
         this.controlPagination = this.showPagination === false ? hideIt : showIt;
+        console.log('Options');
+        console.log(this.options);
         this.setRecordsToDisplay();
     }
 
@@ -50,7 +68,8 @@ export default class Paginator extends LightningElement {
         this.pageNumber = this.pageNumber+1;
         this.setRecordsToDisplay();
     }
-    setRecordsToDisplay(){
+    @api setRecordsToDisplay(){
+        
         this.recordsToDisplay = [];
         if(!this.pageSize)
             this.pageSize = this.totalRecords;
@@ -63,6 +82,7 @@ export default class Paginator extends LightningElement {
             if(i === this.totalRecords) break;
             this.recordsToDisplay.push(this.records[i]);
         }
+        console.log('Paginator setRecordsToDisplay');
         console.log(JSON.stringify(this.recordsToDisplay));
         this.dispatchEvent(new CustomEvent('paginatorchange', {detail: this.recordsToDisplay})); //Send records to display on table to the parent component
     }
@@ -101,8 +121,8 @@ export default class Paginator extends LightningElement {
                 //Use other field name here in place of 'Name' field if you want to search by other field
                 //this.recordsToDisplay = this.records.filter(rec => rec.includes(searchKey));
                 //Search with any column value (Updated as per the feedback)
-                this.recordsToDisplay = this.records.filter(rec => JSON.stringify(rec.Name).includes(searchKey));
-                if(Array.isArray(this.recordsToDisplay) && this.recordsToDisplay.length > 0)
+                this.recordsToDisplay = this.records.filter(rec => JSON.stringify(rec[this.searchFieldName]).includes(searchKey));
+                if(Array.isArray(this.recordsToDisplay))
                     this.dispatchEvent(new CustomEvent('paginatorchange', {detail: this.recordsToDisplay})); //Send records to display on table to the parent component
             }, DELAY);
         }else{
@@ -110,4 +130,37 @@ export default class Paginator extends LightningElement {
             this.setRecordsToDisplay();
         }        
     }
+
+    handleDateChange(event) {
+        console.log('Datepicker value');
+        console.log(event.target.value);
+        console.log('records value');
+        console.log(this.records);
+        if(!event.target.value) {
+            this.recordsToDisplay = this.records;
+        } else {        
+            this.recordsToDisplay = this.records.filter(rec => JSON.stringify(rec.Date__c).includes(''+event.target.value));
+        }
+        console.log('recordss to display after filtering');
+        console.log(this.recordsToDisplay);
+                if(Array.isArray(this.recordsToDisplay))
+                    this.dispatchEvent(new CustomEvent('paginatorchange', {detail: this.recordsToDisplay})); //Send records to display on table to the parent component
+    }
+
+    handleComboBoxChange(event) {
+        console.log('Combo value');
+        console.log(event.target.value);
+        if(!event.target.value) {
+            this.recordsToDisplay = this.records;
+        } else {        
+            this.recordsToDisplay = this.records.filter(rec => JSON.stringify(rec.Status__c).includes(''+event.target.value));
+        }
+        console.log('recordss to display after filtering');
+        console.log(this.recordsToDisplay);
+                if(Array.isArray(this.recordsToDisplay))
+                    this.dispatchEvent(new CustomEvent('paginatorchange', {detail: this.recordsToDisplay})); //Send records to display on table to the parent component
+
+    }
+
+
 }

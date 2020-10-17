@@ -3,6 +3,7 @@ import getGroups from '@salesforce/apex/FetchDataHelper.getGroups';
 import getSubgroupsByGroup from '@salesforce/apex/FetchDataHelper.getSubgroupsByGroup';
 import getDishesBySubgroup from '@salesforce/apex/FetchDataHelper.getDishesBySubgroup';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import refreshApex from '@salesforce/apex';
 
 let cols = [ 
     { label: 'Dish', fieldName: 'Name', hideDefaultActions: true },
@@ -17,10 +18,9 @@ let cols = [
           name: 'addDishItem', 
           title: 'Add to Order', 
           disabled: false
-        }
-      },
-    { label: 'Amount', fieldName: 'Amount__c', type: 'number', editable: true, hideDefaultActions: true,  typeAttributes: { maximumFractionDigits: 0 },  cellAttributes: { alignment: 'center'}},
-    { label: 'Comments', fieldName: 'comments', type: 'text', hideDefaultActions: true, wrapText: true, editable: true }
+        },
+        cellAttributes: { alignment: 'center'}
+      }
 ];  
 
 export default class Menu extends LightningElement {
@@ -28,8 +28,7 @@ export default class Menu extends LightningElement {
     columns = cols;
     draftValues = [];
     
-    value='';
-
+    
     value1 = '';
 
     @track
@@ -37,11 +36,9 @@ export default class Menu extends LightningElement {
 
     allSelectedRaws = [];
 
-    orderItems = [];
-
     @track rowNumberOffset = 0;
 
-    @track 
+     
     items = []; //this will hold key, value pair
 
     @track 
@@ -55,18 +52,33 @@ export default class Menu extends LightningElement {
     @track
     chosenGroup
 
+    @api
+    orderItems = [];
+
+    orderItemsCopy = [];
+
     @track
     chosenSubgroup
 
+    @track groups;
+    @track subgroups;
+
+
     @wire(getSubgroupsByGroup, { groupId: '$chosenGroup' })
-    wiredSubgroups({ error, data }) {
+    wiredSubgroups(value) {
+        console.log('refetch subgroups');
+        let data = value.data;
+        let error = value.error;
+        //this.groups = value;
         if (data) {
+            this.items1 = [];
             //create array with elements which has been retrieved controller
             //here value will be Id and label of combobox will be Name
             for(var i=0; i<data.length; i++)  {
                 this.items1 = [...this.items1 ,{value: data[i].Id , label: data[i].Name} ];                                   
             }               
             this.error = undefined;
+            this.subgroups = this.items1;
         } else if (error) {
             this.error = error;
         }
@@ -74,13 +86,18 @@ export default class Menu extends LightningElement {
 
     @wire(getGroups)
     wiredGroups({ error, data }) {
-        if (data) {
+        if (data) {          
+            let items = [];  
             //create array with elements which has been retrieved controller
             //here value will be Id and label of combobox will be Name
             for(var i=0; i<data.length; i++)  {
-                this.items = [...this.items ,{value: data[i].Id , label: data[i].Name} ];                                   
-            }                
+                items = [...items ,{value: data[i].Id , label: data[i].Name} ];                                   
+            }    
+            this.items = items;   
+            this.groups = items;         
             this.error = undefined;
+            console.log('groups');
+            console.log(this.items);
         } else if (error) {
             this.error = error;
         }
@@ -89,36 +106,53 @@ export default class Menu extends LightningElement {
     @wire(getDishesBySubgroup, { subgroupId: '$chosenSubgroup' })
     wiredDishes({error,data}){
         if(data){
+            this.showTable = true;
+            console.log('new subgroup');
+            console.log(this.chosenSubgroup);
+            console.log('refetching dishes ...');
+            this.dishes = [];
             let recs = [];
             for(let i=0; i<data.length; i++){
                 let tempDish = {};
                 tempDish.rowNumber = (i+1);
                 tempDish.checked = false;
+                tempDish.comments = '';
                 tempDish = Object.assign(tempDish, data[i]);
                 recs.push(tempDish);
             }
             this.dishes = recs;
-            this.showTable = true;
+            console.log('new dishes');
+            console.log(this.dishes);
+            
+            //this.template.querySelector(`[data-id="paginator"]`).setRecordsToDisplay();
+            //setTimeout(this.refreshDishes, 5000);
         }else{
             this.error = error;
         }       
     }
 
-    //gettter to return items which is mapped with options attribute
-    get groups() {
-        return this.items;
+    refreshDishes() {
+        this.template.querySelector(`[data-id="paginator"]`).setRecordsToDisplay();
     }
     
-    get subgroups() {
-        return this.items1;
-    }
 
     handleGroupChange(event) {
-        this.chosenGroup = event.detail.value
+        if(event.target.value) {
+            this.chosenGroup = event.detail.value;
+        }            
+        //return refreshApex(this.subgroups);
     }
 
     handleSubgroupChange(event) {
-        this.chosenSubgroup = event.detail.value
+        console.log(this.subgroups);
+        console.log('new subgroup value');
+        console.log(event.target.value);
+        
+
+        if(event.target.value) {
+            this.chosenSubgroup = event.detail.value;
+        }
+        
     }
 
     handleRowAction(event) {
@@ -134,6 +168,8 @@ export default class Menu extends LightningElement {
                 "Id": event.detail.row.Id,
                 "Amount": event.detail.row.Amount__c 
             }
+            console.log('object');
+            console.log(orderItem);
             this.addOrderItem(orderItem);
 
             /*const event = new ShowToastEvent({
@@ -144,12 +180,12 @@ export default class Menu extends LightningElement {
 
             const selectEvent = new CustomEvent("dishselect", 
                 {
-                detail: this.orderItems
+                detail: this.orderItemsCopy
               });
           
               // Dispatches the event.
               this.dispatchEvent(selectEvent);
-              console.log('Order items!');
+              console.log('Order items after event!');
               console.log(this.orderItems);
         }
         //console.log(JSON.stringify(event.detail.rowNumber));
@@ -166,12 +202,14 @@ export default class Menu extends LightningElement {
 
     addOrderItem(row) {
         console.log('Add order item!');
-        let index = this.orderItems.findIndex(this.isIdPresent, row);
+        this.orderItemsCopy = JSON.parse(JSON.stringify(this.orderItems));
+        
+        let index = this.orderItemsCopy.findIndex(this.isIdPresent, row);
         console.log('Index ' + index);
         if(index != -1) {
-            this.orderItems[index].Amount++; 
+            this.orderItemsCopy[index].Amount++; 
         } else {
-            this.orderItems.push(row);
+            this.orderItemsCopy.push(row);
         }
         console.log('End!');
     }
@@ -183,8 +221,10 @@ export default class Menu extends LightningElement {
     handlePaginatorChange(event){
         console.log('Paginator change!');
         this.dishesToDisplay = event.detail;
-        this.rowNumberOffset = this.dishesToDisplay[0].rowNumber - 1;
-        console.log('Row offset ' + this.rowNumberOffset);
+        if(this.dishesToDisplay.length > 0) {
+            this.rowNumberOffset = this.dishesToDisplay[0].rowNumber - 1;
+            console.log('Row offset ' + this.rowNumberOffset);
+        }        
         console.log(JSON.stringify(this.dishesToDisplay));
     }
 

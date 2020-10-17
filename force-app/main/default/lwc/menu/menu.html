@@ -1,8 +1,8 @@
 <template>
+    <lightning-card title="Menu" icon-name="standard:picklist_type">  
     <lightning-combobox
             name="group"
             label="Group"
-            value={value}
             placeholder="Select Group"
             options={groups}
             onchange={handleGroupChange} 
@@ -13,7 +13,6 @@
     <lightning-combobox
             name="subgroup"
             label="Subgroup"
-            value={value1}
             placeholder="Select Subgroup"
             options={subgroups}
             onchange={handleSubgroupChange} >
@@ -22,10 +21,12 @@
 
     <div class="slds-var-m-around_medium">
         <template if:true={showTable}>
-            <c-paginator records={dishes} 
+            <c-paginator records-p={dishes} 
                         total-records={dishes.length} 
                         show-search-box="true" 
-                        onpaginatorchange={handlePaginatorChange}>
+                        search-field-name="Name"
+                        onpaginatorchange={handlePaginatorChange}
+                        data-id="paginator">
             </c-paginator>
             <lightning-datatable
                 key-field="id"
@@ -40,5 +41,5 @@
             </lightning-datatable>
         </template>
     </div>
-      
+</lightning-card>
 </template>

@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track, api } from 'lwc';
 
 export default class Main extends LightningElement {
 
@@ -14,9 +14,12 @@ export default class Main extends LightningElement {
         this.totalPrice = this.countNewTotalPrice();
         console.log('dishes in main ');
         console.log(this.selectedDishes);
+
+        //call 
+        this.template.querySelector("c-previous-orders").handleValueChange();
     }
 
-    handleChange(event) {
+    @api handleChange(event) {
         console.log(event);
         console.log('main notification');
         let dishes = JSON.parse(JSON.stringify(event.detail));

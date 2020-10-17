@@ -15,7 +15,8 @@ let cols = [
           name: 'incDishItem', 
           title: 'add one to order', 
           disabled: false
-        }
+        },
+        cellAttributes: { alignment: 'center'}
       },
       {
         type:  'button',
@@ -26,7 +27,8 @@ let cols = [
           name: 'decDishItem', 
           title: 'delete one frow Order', 
           disabled: false
-        }
+        },
+        cellAttributes: { alignment: 'center'}
       },
     {
         type:  'button',
@@ -37,7 +39,8 @@ let cols = [
           name: 'deleteDishItem', 
           title: 'Delete frow Order', 
           disabled: false
-        }
+        },
+        cellAttributes: { alignment: 'center'}
       }
 ]; 
 

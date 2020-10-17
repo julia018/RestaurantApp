@@ -22,8 +22,8 @@
         data={orderDishes}
         columns={columns}
         onrowaction={handleRowAction}
-        onsave={handleSave}
         draft-values={draftValues}
+        onsave={handleSave}
         oncancel={handleCancel}
         show-row-number-column>
     </lightning-datatable>
@@ -33,6 +33,7 @@
 
   <!-- modal footer start-->
   <footer class="slds-modal__footer">      
+     <button class="slds-button slds-button_neutral" onclick={hideOrderDetails}>Cancel</button>
   </footer>
 
 </div>

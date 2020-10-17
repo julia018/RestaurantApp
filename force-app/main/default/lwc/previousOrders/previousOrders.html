@@ -1,0 +1,30 @@
+<template>
+    <lightning-card title="Order History" icon-name="standard:orders">
+    <lightning-button variant="success" label="Show Previous Orders" onclick={showPreviousOrders} ></lightning-button>
+    <lightning-button variant="success" label="Hide Previous Orders" onclick={hidePreviousOrders} ></lightning-button>
+    <div class="slds-var-m-around_medium">
+        <template if:true={showTable}>
+            <c-paginator records-p={orders} 
+                        total-records={orders.length} 
+                        show-search-box="true" 
+                        show-date-picker="true"
+                        show-combo-box="true"
+                        search-field-name="Dishes"
+                        options={comboOptions}
+                        onpaginatorchange={handlePaginatorChange}>
+            </c-paginator>
+            <lightning-datatable
+                key-field="id"
+                data={ordersToDisplay}
+                columns={columns}
+                onrowaction={handleRowAction}
+                draft-values={draftValues}
+                suppress-bottom-bar="true"
+                show-row-number-column
+                row-number-offset={rowNumberOffset}>
+            </lightning-datatable>
+            <lightning-input type="number" name="totalOrdersPrice" readonly label="Total Orders Price" value={totalOrdersPrice}></lightning-input>
+        </template>
+    </div>
+</lightning-card>
+</template>
